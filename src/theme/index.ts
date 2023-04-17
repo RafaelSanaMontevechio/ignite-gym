@@ -35,4 +35,28 @@ export const THEME = extendTheme({
     14: 56,
     33: 148,
   },
+  components: {
+    Button: {
+      defaultProps: {
+        h: 14,
+        w: 'full',
+        rounded: 'sm',
+      },
+      variants: {
+        outline: () => {
+          return {
+            bg: 'transparent',
+          };
+        },
+        solid: () => {
+          return {
+            bg: `green.700`,
+            _pressed: {
+              bg: 'green.500',
+            },
+          };
+        },
+      },
+    },
+  },
 });
