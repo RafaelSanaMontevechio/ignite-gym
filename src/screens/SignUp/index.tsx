@@ -1,19 +1,63 @@
+import { useNavigation } from '@react-navigation/native';
+
 import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
 
-import LogoSvg from '@assets/logo.svg';
-import { Input } from '@components/Input';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
+import { useForm, Controller } from 'react-hook-form';
+
+import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png';
+
+import { Input } from '@components/Input';
 import { Button } from '@components/Button';
-import { useNavigation } from '@react-navigation/native';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 
+interface FormDataProps {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const signUpSchema = yup.object({
+  name: yup.string().required('Informe o nome'),
+  email: yup.string().required('Informe o e-mail').email(),
+  password: yup
+    .string()
+    .required('Informe a senha')
+    .min(6, 'A senha deve ter ao 6 dígitos'),
+  confirmPassword: yup
+    .string()
+    .required('Confirme de senha')
+    .oneOf([yup.ref('password')], 'A confirmação de senha não confere'),
+});
+
 export function SignUp() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormDataProps>({
+    resolver: yupResolver(signUpSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   function handleGoBackToLogin() {
     navigation.navigate('signIn');
+  }
+
+  function handleSignUp(data: FormDataProps) {
+    console.log(data);
   }
 
   return (
@@ -44,11 +88,71 @@ export function SignUp() {
         </Center>
 
         <Center>
-          <Input placeholder="Nome" />
-          <Input placeholder="E-mail" secureTextEntry />
-          <Input placeholder="Senha" secureTextEntry />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="Nome"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.name?.message}
+              />
+            )}
+            name="name"
+          />
 
-          <Button text="Criar e acessar" variant="solid" />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="E-mail"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.email?.message}
+                keyboardType="email-address"
+              />
+            )}
+            name="email"
+          />
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="Senha"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                secureTextEntry
+                errorMessage={errors.password?.message}
+              />
+            )}
+            name="password"
+          />
+
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="Confirme a senha"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                secureTextEntry
+                returnKeyType="send"
+                errorMessage={errors.confirmPassword?.message}
+              />
+            )}
+            name="confirmPassword"
+          />
+
+          <Button
+            text="Criar e acessar"
+            variant="solid"
+            onPress={handleSubmit(handleSignUp)}
+          />
         </Center>
 
         <Center mt={24}>
