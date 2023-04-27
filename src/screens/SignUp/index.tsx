@@ -1,11 +1,21 @@
 import { useNavigation } from '@react-navigation/native';
 
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import {
+  VStack,
+  Image,
+  Text,
+  Center,
+  Heading,
+  ScrollView,
+  useToast,
+} from 'native-base';
 
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import { useForm, Controller } from 'react-hook-form';
+
+import axios from 'axios';
 
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png';
@@ -14,6 +24,10 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+
+import { API } from '@services/api';
+import { Alert } from 'react-native';
+import { AppError } from '@utils/AppError';
 
 interface FormDataProps {
   name: string;
@@ -50,14 +64,33 @@ export function SignUp() {
     },
   });
 
+  const toast = useToast();
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   function handleGoBackToLogin() {
     navigation.navigate('signIn');
   }
 
-  function handleSignUp(data: FormDataProps) {
-    console.log(data);
+  async function handleSignUp(data: FormDataProps) {
+    try {
+      const response = await API.post('/users', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : 'Não foi possível criar a conta';
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    }
   }
 
   return (
