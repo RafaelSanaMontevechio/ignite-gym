@@ -17,6 +17,8 @@ import { useForm, Controller } from 'react-hook-form';
 
 import axios from 'axios';
 
+import { useState } from 'react';
+
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png';
 
@@ -26,8 +28,8 @@ import { Button } from '@components/Button';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 
 import { API } from '@services/api';
-import { Alert } from 'react-native';
 import { AppError } from '@utils/AppError';
+import { useAuth } from '@hooks/useAuth';
 
 interface FormDataProps {
   name: string;
@@ -50,6 +52,10 @@ const signUpSchema = yup.object({
 });
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { signIn } = useAuth();
+
   const {
     control,
     handleSubmit,
@@ -74,12 +80,18 @@ export function SignUp() {
 
   async function handleSignUp(data: FormDataProps) {
     try {
-      const response = await API.post('/users', {
+      setIsLoading(true);
+
+      await API.post('/users', {
         name: data.name,
         email: data.email,
         password: data.password,
       });
+
+      await signIn(data.email, data.password);
     } catch (error) {
+      setIsLoading(false);
+
       const isAppError = error instanceof AppError;
       const title = isAppError
         ? error.message
@@ -185,6 +197,7 @@ export function SignUp() {
             text="Criar e acessar"
             variant="solid"
             onPress={handleSubmit(handleSignUp)}
+            isLoading={isLoading}
           />
         </Center>
 
