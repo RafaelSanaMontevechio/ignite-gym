@@ -13,22 +13,31 @@ import { storageUserSave, getStorageUser } from '@storage/stotageUser';
 interface AuthContextProps {
   user: UserDTO | undefined;
   signIn: (email: string, password: string) => Promise<void>;
+  isLoadingUserStorageData: boolean;
 }
 
 export const AuthContext = createContext({} as AuthContextProps);
 
 export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState({} as UserDTO);
+  const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
+    useState(true);
 
   const memoUser = useMemo(() => {
     return user;
   }, [user]);
 
   async function loadUser() {
-    const userLoggedIn = await getStorageUser();
+    try {
+      const userLoggedIn = await getStorageUser();
 
-    if (userLoggedIn) {
-      setUser(userLoggedIn);
+      if (userLoggedIn) {
+        setUser(userLoggedIn);
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoadingUserStorageData(false);
     }
   }
 
@@ -50,7 +59,9 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: memoUser, signIn }}>
+    <AuthContext.Provider
+      value={{ user: memoUser, signIn, isLoadingUserStorageData }}
+    >
       {children}
     </AuthContext.Provider>
   );
