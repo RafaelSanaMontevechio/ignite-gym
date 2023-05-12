@@ -4,9 +4,12 @@ import { HStack, VStack, Heading, Text, Icon } from 'native-base';
 
 import { MaterialIcons } from '@expo/vector-icons';
 
+import { useAuth } from '@hooks/useAuth';
 import { UserAvatar } from '@components/UserAvatar';
 
 export function HomeHeader() {
+  const { user } = useAuth();
+
   return (
     <HStack bg="gray.600" pt={16} pb={5} px={8} alignItems="center">
       <UserAvatar
@@ -20,7 +23,7 @@ export function HomeHeader() {
           Olá
         </Text>
         <Heading color="gray.100" fontSize="md" fontFamily="heading">
-          Rafael
+          {user?.name}
         </Heading>
       </VStack>
 
