@@ -12,10 +12,11 @@ import { HomeHeader } from '@components/HomeHeader';
 import { Group } from '@components/Group';
 import { ExerciseCard } from '@components/ExerciseCard';
 import { API } from '@services/api';
+import { ExerciseDTO } from '@dtos/exercisesDTO';
 
 export function Home() {
   const [groups, setGroups] = useState<string[]>([]);
-  const [exercises, setExercises] = useState<string[]>([]);
+  const [exercises, setExercises] = useState<ExerciseDTO[]>([]);
 
   const [groupSelected, setGroupSelected] = useState('costas');
 
@@ -112,9 +113,12 @@ export function Home() {
 
         <FlatList
           data={exercises}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.id}
           renderItem={(item) => (
-            <ExerciseCard onPress={handleExercisesDetails} />
+            <ExerciseCard
+              exercise={item.item}
+              onPress={handleExercisesDetails}
+            />
           )}
           showsVerticalScrollIndicator={false}
           _contentContainerStyle={{ paddingBottom: 20 }}
