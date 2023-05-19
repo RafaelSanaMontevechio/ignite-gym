@@ -30,8 +30,8 @@ export function Home() {
     setGroupSelected(group);
   }
 
-  function handleExercisesDetails() {
-    navigation.navigate('exercise');
+  function handleExercisesDetails(exerciseId: string) {
+    navigation.navigate('exercise', { exerciseId });
   }
 
   async function fetchGroups() {
@@ -122,10 +122,10 @@ export function Home() {
           <FlatList
             data={exercises}
             keyExtractor={(item) => item.id}
-            renderItem={(item) => (
+            renderItem={({ item }) => (
               <ExerciseCard
-                exercise={item.item}
-                onPress={handleExercisesDetails}
+                exercise={item}
+                onPress={() => handleExercisesDetails(item.id)}
               />
             )}
             showsVerticalScrollIndicator={false}
