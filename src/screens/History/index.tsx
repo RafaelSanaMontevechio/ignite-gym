@@ -1,36 +1,66 @@
-import { Heading, VStack, SectionList, Text } from 'native-base';
+import { useCallback, useState } from 'react';
+
+import { useFocusEffect } from '@react-navigation/native';
+
+import { Heading, VStack, SectionList, Text, useToast } from 'native-base';
+
+import { API } from '@services/api';
+import { AppError } from '@utils/AppError';
+import { HistoryByDayDTO } from '@dtos/HistoryDTO';
 
 import { HistoryCard } from '@components/HistoryCard';
 import { ScreenHeader } from '@components/ScreenHeader';
-import { useState } from 'react';
 
 export function History() {
-  const [exercises, setExercises] = useState([
-    {
-      title: '26-05-23',
-      data: ['Pizza', 'Burger', 'Risotto'],
-    },
-    {
-      title: '27-05-23',
-      data: ['French Fries', 'Onion Rings'],
-    },
-  ]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [history, setHistory] = useState<HistoryByDayDTO[]>([]);
+
+  const toast = useToast();
+
+  async function fetchHistory() {
+    try {
+      setIsLoading(true);
+
+      const response = await API.get(`/history`);
+
+      setHistory(response.data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : 'Não foi possível carregar o histórico.';
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, []),
+  );
 
   return (
     <VStack flex={1}>
       <ScreenHeader title="Histórico de exercícios" />
 
       <SectionList
-        sections={exercises}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => <HistoryCard />}
+        sections={history}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <HistoryCard history={item} />}
         renderSectionHeader={({ section }) => (
           <Heading color="gray.200" fontSize="md" mb={3}>
             {section.title}
           </Heading>
         )}
         contentContainerStyle={
-          exercises.length === 0 && { flex: 1, justifyContent: 'center' }
+          history.length === 0 && { flex: 1, justifyContent: 'center' }
         }
         ListEmptyComponent={() => (
           <Text color="gray.100" textAlign="center">
