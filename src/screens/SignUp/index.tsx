@@ -15,8 +15,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import { useForm, Controller } from 'react-hook-form';
 
-import axios from 'axios';
-
 import { useState } from 'react';
 
 import LogoSvg from '@assets/logo.svg';

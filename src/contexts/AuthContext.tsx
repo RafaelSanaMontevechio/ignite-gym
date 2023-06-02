@@ -25,6 +25,7 @@ interface AuthContextProps {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isLoadingUserStorageData: boolean;
+  updateUserProfile: (user: UserDTO) => Promise<void>;
 }
 
 export const AuthContext = createContext({} as AuthContextProps);
@@ -118,13 +119,28 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     }
   }
 
+  async function updateUserProfile(userUpdated: UserDTO) {
+    try {
+      setUser(userUpdated);
+      await storageUserSave(userUpdated);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   useEffect(() => {
     loadUser();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user: memoUser, signIn, signOut, isLoadingUserStorageData }}
+      value={{
+        user: memoUser,
+        signIn,
+        signOut,
+        isLoadingUserStorageData,
+        updateUserProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
