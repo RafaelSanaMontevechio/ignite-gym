@@ -29,6 +29,7 @@ import { UserAvatar } from '@components/UserAvatar';
 import { ScreenHeader } from '@components/ScreenHeader';
 import { AppError } from '@utils/AppError';
 import { UserDTO } from '@dtos/UserDTO';
+import defaultUserPhoto from '@assets/userPhotoDefault.png';
 
 type FormDataProps = {
   name: string;
@@ -61,9 +62,6 @@ const profileSchema = yup.object({
 });
 
 export function Profile() {
-  const [userPhoto, setUserPhoto] = useState(
-    'https://github.com/rafaelsanamontevechio.png',
-  );
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -111,10 +109,45 @@ export function Profile() {
           });
         }
 
-        setUserPhoto(selectedPhoto.assets[0].uri);
+        const fileExtension = selectedPhoto.assets[0].uri.split('.').pop();
+        const photoFile = {
+          name: `${user?.name}.${fileExtension}`.toLowerCase(),
+          uri: selectedPhoto.assets[0].uri,
+          type: `${selectedPhoto.assets[0].type}/${fileExtension}`,
+        } as any;
+
+        const userPhotoUploadForm = new FormData();
+        userPhotoUploadForm.append('avatar', photoFile);
+
+        const response = await API.patch('/users/avatar', userPhotoUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const userUpdated = user;
+
+        if (userUpdated) {
+          userUpdated.avatar = response.data.avatar;
+          updateUserProfile(userUpdated);
+        }
+
+        toast.show({
+          title: 'Foto atualizada',
+          placement: 'top',
+          bgColor: 'green.500',
+        });
       }
     } catch (error) {
-      console.log(error);
+      const isAppError = error instanceof AppError;
+
+      const title = isAppError ? error.message : 'Não foi atualizar a imagem';
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
     } finally {
       setPhotoIsLoading(false);
     }
@@ -171,7 +204,11 @@ export function Profile() {
             />
           ) : (
             <UserAvatar
-              source={{ uri: userPhoto }}
+              source={
+                user?.avatar
+                  ? { uri: `${API.defaults.baseURL}/avatar/${user?.avatar}` }
+                  : defaultUserPhoto
+              }
               alt="foto do usuário"
               size={PHOTO_SIZE}
             />

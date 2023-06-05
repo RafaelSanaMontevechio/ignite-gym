@@ -4,6 +4,7 @@ import { HStack, VStack, Heading, Text, Icon } from 'native-base';
 
 import { MaterialIcons } from '@expo/vector-icons';
 
+import { API } from '@services/api';
 import { useAuth } from '@hooks/useAuth';
 import { UserAvatar } from '@components/UserAvatar';
 
@@ -15,7 +16,11 @@ export function HomeHeader() {
   return (
     <HStack bg="gray.600" pt={16} pb={5} px={8} alignItems="center">
       <UserAvatar
-        source={user?.avatar ? { uri: user?.avatar } : defaultUserPhoto}
+        source={
+          user?.avatar
+            ? { uri: `${API.defaults.baseURL}/avatar/${user?.avatar}` }
+            : defaultUserPhoto
+        }
         alt="Imagem do usuário"
         size={16}
         mr={4}
