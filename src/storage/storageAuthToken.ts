@@ -4,14 +4,29 @@ import { UserDTO } from '@dtos/UserDTO';
 
 import { AUTH_TOKEN_STORAGE } from '@storage/storageConfig';
 
-export async function storageAuthTokenSave(token: string) {
-  await AsyncStorage.setItem(AUTH_TOKEN_STORAGE, JSON.stringify(token));
+type StorageAuthTokenProps = {
+  token: string;
+  refreshToken: string;
+};
+
+export async function storageAuthTokenSave({
+  token,
+  refreshToken,
+}: StorageAuthTokenProps) {
+  await AsyncStorage.setItem(
+    AUTH_TOKEN_STORAGE,
+    JSON.stringify({ token, refreshToken }),
+  );
 }
 
 export async function getStorageAutToken() {
-  const token = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE);
+  const response = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE);
 
-  return token;
+  const { token, refreshToken }: StorageAuthTokenProps = response
+    ? JSON.parse(response)
+    : {};
+
+  return { token, refreshToken };
 }
 
 export async function removeStorageAuthToken() {
