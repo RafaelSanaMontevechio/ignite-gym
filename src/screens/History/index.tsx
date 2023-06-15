@@ -8,6 +8,7 @@ import { API } from '@services/api';
 import { AppError } from '@utils/AppError';
 import { HistoryByDayDTO } from '@dtos/HistoryDTO';
 
+import { Loading } from '@components/Loading';
 import { HistoryCard } from '@components/HistoryCard';
 import { ScreenHeader } from '@components/ScreenHeader';
 
@@ -50,27 +51,31 @@ export function History() {
     <VStack flex={1}>
       <ScreenHeader title="Histórico de exercícios" />
 
-      <SectionList
-        sections={history}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <HistoryCard history={item} />}
-        renderSectionHeader={({ section }) => (
-          <Heading color="gray.200" fontSize="md" mb={3}>
-            {section.title}
-          </Heading>
-        )}
-        contentContainerStyle={
-          history.length === 0 && { flex: 1, justifyContent: 'center' }
-        }
-        ListEmptyComponent={() => (
-          <Text color="gray.100" textAlign="center">
-            Não há exercícios registrados. {'\n'}
-            Vamos fazer exercícios?
-          </Text>
-        )}
-        mt={3}
-        px={6}
-      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <SectionList
+          sections={history}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <HistoryCard history={item} />}
+          renderSectionHeader={({ section }) => (
+            <Heading color="gray.200" fontSize="md" mb={3}>
+              {section.title}
+            </Heading>
+          )}
+          contentContainerStyle={
+            history.length === 0 && { flex: 1, justifyContent: 'center' }
+          }
+          ListEmptyComponent={() => (
+            <Text color="gray.100" textAlign="center">
+              Não há exercícios registrados. {'\n'}
+              Vamos fazer exercícios?
+            </Text>
+          )}
+          mt={3}
+          px={6}
+        />
+      )}
     </VStack>
   );
 }
